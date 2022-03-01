@@ -11,6 +11,8 @@ library(shinydashboard)
 library(DT)
 # devtools::install_github("swsoyee/r3dmol")
 library(r3dmol)
+library(reshape)
+library(dplyr)
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
