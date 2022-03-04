@@ -35,16 +35,9 @@ ui <- dashboardPage(
             h2("Time series overview"),
             
             selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE),
-            # fluidRow(column(12, uiOutput("picker"), actionButton("view", "View Selection"))),
-            # fluidRow(column(12, selectInput(inputId = "age2", label = "Select", choices = c("young", "old")), 
-            #                 actionButton("view", "Go!"), 
-            #                 uiOutput("picker"))),
             fluidRow(column(12, div(DT::dataTableOutput("overviewTable")))),
             fluidRow(column(5, plotOutput("chart")),
-                     fluidRow(column(5, r3dmolOutput("pdb"))),
-                     
-                     # fluidRow(column(5, plotOutput("chart")),column(5, r3dmolOutput("pdb")))
-                     
+            fluidRow(column(5, r3dmolOutput("pdb"))),
             ) # end of main panel
             
         ),
@@ -57,8 +50,7 @@ ui <- dashboardPage(
             tabName = "3dstructures", 
             h2("3D tab content"), 
             fluidRow(column(12, div(DT::dataTableOutput("pdbTable")))),
-        )
-    )
+        ))
     )
 )
 
