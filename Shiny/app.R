@@ -36,9 +36,9 @@ ui <- dashboardPage(
             
             selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE),
             fluidRow(column(12, div(DT::dataTableOutput("overviewTable")))),
+            fluidRow(column(12, plotOutput("chartMultiple"))),
             fluidRow(column(5, plotOutput("chart")),
-            fluidRow(column(5, r3dmolOutput("pdb"))),
-            fluidRow(column(12, plotOutput("chartMultiple")))
+            fluidRow(column(5, r3dmolOutput("pdb")))
             ) # end of main panel
             
         ),
@@ -79,6 +79,7 @@ server <- function(input, output, session) {
         # Remove PDB and Plot
         output$chart = NULL
         output$pdb = NULL
+        output$chartMultiple = NULL
         if (!is.null(s)) {
             # If only 1 is selected we can show the 3d plot
             if (length(s) == 1) {
@@ -177,7 +178,6 @@ server <- function(input, output, session) {
                     autoWidth = TRUE, ## use smart column width handling
                     columnDefs = 
                         list(
-                        # list(width = '200px', targets = "_all"),
                         list(targets = columnNumbers, visible = FALSE),
                     # ),
                     list(
