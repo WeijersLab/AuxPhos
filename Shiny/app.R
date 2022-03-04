@@ -38,6 +38,7 @@ ui <- dashboardPage(
             fluidRow(column(12, div(DT::dataTableOutput("overviewTable")))),
             fluidRow(column(5, plotOutput("chart")),
             fluidRow(column(5, r3dmolOutput("pdb"))),
+            fluidRow(column(12, plotOutput("chartMultiple")))
             ) # end of main panel
             
         ),
@@ -75,29 +76,31 @@ server <- function(input, output, session) {
     # highlight selected rows in the scatterplot and show 3d structure
     observeEvent(input$overviewTable_rows_selected, ignoreNULL = FALSE, {
         s = input$overviewTable_rows_selected
+        # Remove PDB and Plot
+        output$chart = NULL
+        output$pdb = NULL
         if (!is.null(s)) {
-            # Chart plot
-            output$chart = renderPlot({
-                # Obtain the rows selected
-                rowData <- timeSeries[s,]
-                # Reduce columns to the selected few
-                rowData <- rowData %>% select(1, 2,3,4,5,6,7)
-                # print(colnames(rowData))
-                # Turn into 3 columns for ggplot
-                df_melted = melt(rowData, id.vars = 'UniqueID')
-                # Plot
-                ggplot(df_melted, aes(x = variable, y = value)) + geom_line(aes(color = UniqueID, group = UniqueID))
-            })
             # If only 1 is selected we can show the 3d plot
             if (length(s) == 1) {
+                # Chart plot
+                output$chart = renderPlot({
+                    # Obtain the rows selected
+                    rowData <- timeSeries[s,]
+                    # Reduce columns to the selected few
+                    rowData <- rowData %>% select(1, 2,3,4,5,6,7)
+                    # print(colnames(rowData))
+                    # Turn into 3 columns for ggplot
+                    df_melted = melt(rowData, id.vars = 'UniqueID')
+                    # Plot
+                    ggplot(df_melted, aes(x = variable, y = value)) + geom_line(aes(color = UniqueID, group = UniqueID))
+                })
+                
                 # Create PDB plot
                 output$pdb <- renderR3dmol({
                     print(timeSeries[s,])
                     highlight = timeSeries[s,]$`Amino acid`
                     pdb_file = pdbList[s]
-                    if (!dir.exists("pdb")) {
-                        showNotification("Please unzip the PDB zipped folder", type=c("error"))
-                    } else if (file.exists(pdb_file)) {
+                    if (file.exists(pdb_file)) {
                         r3dmol(
                             viewer_spec = m_viewer_spec(
                                 cartoonQuality = 10,
@@ -137,7 +140,19 @@ server <- function(input, output, session) {
                     }
                 })
             } else {
-                output$pdb = NULL
+                # Chart plot
+                output$chartMultiple = renderPlot({
+                    # Obtain the rows selected
+                    rowData <- timeSeries[s,]
+                    # Reduce columns to the selected few
+                    rowData <- rowData %>% select(1, 2,3,4,5,6,7)
+                    # print(colnames(rowData))
+                    # Turn into 3 columns for ggplot
+                    df_melted = melt(rowData, id.vars = 'UniqueID')
+                    # Plot
+                    ggplot(df_melted, aes(x = variable, y = value)) + geom_line(aes(color = UniqueID, group = UniqueID))
+                })
+                
             }
         }
     }
@@ -147,6 +162,8 @@ server <- function(input, output, session) {
     
     # Column filtering changing the data table
     observeEvent(input$Columns, {
+        textLimit <- which(names(timeSeries) %in% c("Gene description"))
+        print(textLimit)
         columnNumbers <- which(!names(timeSeries) %in% input$Columns)
         output$overviewTable <- DT::renderDT(
             datatable(
@@ -158,24 +175,21 @@ server <- function(input, output, session) {
                     scrollX = TRUE,   ## enable scrolling on X axis
                     scrollY = TRUE,   ## enable scrolling on Y axis
                     autoWidth = TRUE, ## use smart column width handling
-                    columnDefs = list(
-                        list(width = '200px', targets = "_all"),
-                        list(targets = columnNumbers, visible = FALSE)
-                    )
-                )
+                    columnDefs = 
+                        list(
+                        # list(width = '200px', targets = "_all"),
+                        list(targets = columnNumbers, visible = FALSE),
+                    # ),
+                    list(
+                            targets = "_all",
+                            render = JS(
+                                "function(data, type, row, meta) {",
+                                "return type === 'display' && data != null && data.length > 25 ?",
+                                "'<span title=\"' + data + '\">' + data.substr(0, 25) + '...</span>' : data;",
+                                "}")))
+                ),
             ))
     })
-    
-    
-    # Generate PDB table (discontinued)
-    output$pdbTable <- DT::renderDataTable(datatable(
-        data=as.data.frame(pdbList),
-        # extensions = 'Buttons',
-        filter = 'top',
-        selection = 'single',
-        rownames= FALSE,
-        options = list()
-    ))
 }
 
 # Run the application
