@@ -34,11 +34,11 @@ ui <- dashboardPage(
             tabName = "time",
             h2("Time series overview"),
             
-            selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE),
+            selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE, width = '100%'),
             fluidRow(column(12, div(DT::dataTableOutput("overviewTable")))),
             fluidRow(column(12, plotOutput("chartMultiple"))),
-            fluidRow(column(5, plotOutput("chart")),
-            fluidRow(column(5, r3dmolOutput("pdb")))
+            fluidRow(column(6, plotOutput("chart")),
+            fluidRow(column(6, r3dmolOutput("pdb")))
             ) # end of main panel
             
         ),
@@ -70,7 +70,7 @@ server <- function(input, output, session) {
     })        
     
     # Selected by default
-    updateSelectInput(session, "Columns", choices=names(timeSeries), selected = c("UniqueID", "T0 min", "T0.5 min", "T1 min", "T2 min", "T5 min", "T10 min", "Gene description"))
+    updateSelectInput(session, "Columns", choices=names(timeSeries), selected = c("UniqueID", "T0 min", "T0.5 min", "T1 min", "T2 min", "T5 min", "T10 min", "Gene ID", "Gene name"))
     
     
     # highlight selected rows in the scatterplot and show 3d structure
