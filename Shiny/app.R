@@ -1,17 +1,12 @@
 #
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
+# A Shiny web application to visualize phosphoproteomics data.
 #
 
+# Load required R packages
 library(shinydashboard)
 library(shiny)
 library(shinyWidgets)
 library(DT)
-# devtools::install_github("swsoyee/r3dmol")
 library(r3dmol)
 library(dplyr)
 library(ggplot2)
@@ -23,35 +18,37 @@ ui <- dashboardPage(
     dashboardHeader(title = "PAUXPHOR"),
     dashboardSidebar(id = "",
                      sidebarMenu(
-                         menuItem("Time Series", tabName = "time"),
                          menuItem("Overview", tabName = "overview"),
-                         menuItem("3D structures", tabName = "3dstructures")
+                         menuItem("Time Series", tabName = "time")
                      )),
     
-    dashboardBody(tabItems(
-        # First tab content
+    dashboardBody(
+        
+        # Add background 'white' for the body to make plot/structures look nicer
+        tags$head(tags$style(HTML('
+                                /* body */
+                                .content-wrapper, .right-side {
+                                background-color: #ffffff;
+                                }
+                                '))),
+        
+        tabItems(
+
+        # 'Time series' tab content
         tabItem(
-            tabName = "time",
-            h2("Time series overview"),
-            
+            tabName = "time",h2("Time series overview"),
             selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE, width = '100%'),
             fluidRow(column(12, div(DT::dataTableOutput("overviewTable")))),
-            fluidRow(column(12, plotOutput("chartMultiple"))),
             fluidRow(column(6, plotOutput("chart")),
             fluidRow(column(6, r3dmolOutput("pdb")))
-            ) # end of main panel
+            )
             
         ),
         
-        # Second tab content
-        tabItem(tabName = "overview", h2("Overview")),
+        # 'Overview' tab content
+        tabItem(tabName = "overview", h2("Overview"))
         
-        # third tab content
-        tabItem(
-            tabName = "3dstructures", 
-            h2("3D tab content"), 
-            fluidRow(column(12, div(DT::dataTableOutput("pdbTable")))),
-        ))
+    )
     )
 )
 
@@ -80,8 +77,7 @@ server <- function(input, output, session) {
         output$pdb = NULL
         output$chartMultiple = NULL
         if (!is.null(s)) {
-            # If only 1 is selected we can show the 3d plot
-            if (length(s) == 1) {
+            
                 # Chart plot
                 output$chart = renderPlot({
                     # Obtain the rows selected
@@ -94,11 +90,13 @@ server <- function(input, output, session) {
                     # Plot
                     ggplot(df_melted, aes(x = variable, y = value)) + geom_line(aes(color = UniqueID, group = UniqueID))
                 })
+            
+            # If only 1 is selected we can show the 3d plot
+            if (length(s) == 1) {
                 
                 # Create PDB plot
                 output$pdb <- renderR3dmol({
                     highlight = timeSeries[s,]$`Amino acid`
-                    
                     pdb_file = paste0("./data/pdb/AF-",timeSeries[s,]$Structure,"-F1-model_v2.pdb")
                     print(paste("Row",s, "Loading", pdb_file))
                     if (file.exists(pdb_file)) {
@@ -141,24 +139,11 @@ server <- function(input, output, session) {
                     }
                 })
             } else {
-                # Chart plot
-                output$chartMultiple = renderPlot({
-                    # Obtain the rows selected
-                    rowData <- timeSeries[s,]
-                    # Reduce columns to the selected few
-                    rowData <- rowData %>% select(1, 2,3,4,5,6,7)
-                    # print(colnames(rowData))
-                    # Turn into 3 columns for ggplot
-                    df_melted = melt(rowData, id.vars = 'UniqueID')
-                    # Plot
-                    ggplot(df_melted, aes(x = variable, y = value)) + geom_line(aes(color = UniqueID, group = UniqueID))
-                })
-                
+                # Show warning message
             }
         }
     }
     )
-    
     
     
     # Column filtering changing the data table
