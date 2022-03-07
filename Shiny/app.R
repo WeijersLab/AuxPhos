@@ -36,11 +36,11 @@ ui <- dashboardPage(
 
         # 'Time series' tab content
         tabItem(
-            tabName = "time",h2("Time series overview"),
+            tabName = "time",h2("Time series data"),
             selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE, width = '100%'),
             fluidRow(column(12, div(DT::dataTableOutput("overviewTable")))),
-            fluidRow(column(6, plotOutput("chart")),
-            fluidRow(column(6, r3dmolOutput("pdb")))
+            fluidRow(column(6, plotOutput("chart"), style='padding-top:30px; padding-bottom:10px'),
+            fluidRow(column(6, r3dmolOutput("pdb"), style='padding-top:30px; padding-bottom:10px'))
             )
             
         ),
@@ -88,7 +88,13 @@ server <- function(input, output, session) {
                     # Turn into 3 columns for ggplot
                     df_melted = melt(rowData, id.vars = 'UniqueID')
                     # Plot
-                    ggplot(df_melted, aes(x = variable, y = value)) + geom_line(aes(color = UniqueID, group = UniqueID))
+                    ggplot(df_melted, aes(x = variable, y = value)) + geom_line(aes(color = UniqueID, group = UniqueID), size=1.2) +
+                    xlab("Time points") + ylab("Normalized ratio") + theme_bw() + 
+                    theme(legend.position="bottom", 
+                          axis.title.x = element_text(size=14, face="bold", vjust = -1),
+                          axis.title.y = element_text(size=14, face="bold"),
+                          axis.text.x = element_text(size=12),
+                          axis.text.y = element_text(size=12))
                 })
             
             # If only 1 is selected we can show the 3d plot
@@ -133,7 +139,7 @@ server <- function(input, output, session) {
                             m_add_sphere(
                                 text = "The middle of the selection",
                                 center = m_sel(resi = highlight), 
-                                spec = m_shape_spec(color = "pink", wireframe = TRUE),
+                                spec = m_shape_spec(color = "grey", wireframe = TRUE),
                                 radius = 2.5
                             )
                     }
