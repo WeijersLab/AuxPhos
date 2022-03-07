@@ -60,8 +60,7 @@ server <- function(input, output, session) {
     
     # Loads the time series data
     timeSeries <- data.table::fread("./data/timeseries.tsv",header = TRUE, sep = "\t")
-    pdbList <- list.files("./data/pdb", full.names = TRUE)
-    
+
     output$picker <- renderUI({
         pickerInput(inputId = 'pick', 
                     label = 'Choose', 
@@ -98,9 +97,10 @@ server <- function(input, output, session) {
                 
                 # Create PDB plot
                 output$pdb <- renderR3dmol({
-                    print(timeSeries[s,])
                     highlight = timeSeries[s,]$`Amino acid`
-                    pdb_file = pdbList[s]
+                    
+                    pdb_file = paste0("./data/pdb/AF-",timeSeries[s,]$Structure,"-F1-model_v2.pdb")
+                    print(paste("Row",s, "Loading", pdb_file))
                     if (file.exists(pdb_file)) {
                         r3dmol(
                             viewer_spec = m_viewer_spec(
