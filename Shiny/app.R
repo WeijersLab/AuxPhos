@@ -103,7 +103,7 @@ server <- function(input, output, session) {
                 # Create PDB plot
                 output$pdb <- renderR3dmol({
                     highlight = timeSeries[s,]$`Amino acid`
-                    pdb_file = paste0("./data/pdb/AF-",timeSeries[s,]$Structure,"-F1-model_v2.pdb")
+                    pdb_file = paste0("./data/pdb/",timeSeries[s,]$Structure,".pdb")
                     print(paste("Row",s, "Loading", pdb_file))
                     if (file.exists(pdb_file)) {
                         r3dmol(
