@@ -1,2 +1,2 @@
-# PAUXPHOR
-Plant and algal AUXin PHOsphoproteomics Resource
+# AuxPhos
+AUXin PHOSphoproteomics resource
