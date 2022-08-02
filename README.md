@@ -21,7 +21,7 @@ For some technical reason (or the ease of access), if you are interested in usin
 **Load AuxPhos from R:**
 
 - Download the whole 'ShinyApp' directory from files above
-- If your 'ShinyApp' directory is in 'Downloads', then type 'Rscript -e "library(methods); shiny::runApp('~/Downloads/ShinyApp', launch.browser = TRUE)"' (excluding outer single quotes) in your terminal window.
+- If your 'ShinyApp' directory is in 'Downloads', then type `Rscript -e "library(methods); shiny::runApp('~/Downloads/ShinyApp', launch.browser = TRUE)"` in your terminal window.
 - AuxPhos tool is now launched in your favourite browser
 	
 **Load AuxPhos from Rstudio:**
@@ -41,6 +41,6 @@ If you use this tool/data, please refer/cite the following publications:
 
 ---
 
-If you have any suggestions, feedback or issues, please write to us (dolf [dot] weijers [at] wur [dot] nl) or 'create an issue' here in the GitHub repository. 
+If you have any suggestions, feedback or issues, please write to us (dolf [dot] weijers [at] wur [dot] nl) or 'create an issue' [here](https://github.com/sumanthmutte/AuxPhos/issues) in the GitHub repository. 
 
 
