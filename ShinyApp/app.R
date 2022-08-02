@@ -15,11 +15,11 @@ library(reshape2)
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
     # Application title
-    dashboardHeader(title = "PAUXPHOR"),
+    dashboardHeader(title = "AuxPhos"),
     dashboardSidebar(id = "",
                      sidebarMenu(
                          menuItem("Overview", tabName = "overview"),
-                         menuItem("Time Series", tabName = "time")
+                         menuItem("Time series", tabName = "time")
                      )),
     
     dashboardBody(
@@ -46,13 +46,16 @@ ui <- dashboardPage(
         ),
         
         # 'Overview' tab content
-        tabItem(tabName = "overview", h2("Overview"))
+        tabItem(tabName = "overview", h2("Overview"), br(),
+                h4(strong("Background")), p("Background information here."), br(), 
+                h4(strong("Experimental data")), p("Data in this database."), br(),
+                h4(strong("References")), p("Add references here.") )
         
     )
     )
 )
 
-# Define server logic required to draw a histogram
+# Define server logic
 server <- function(input, output, session) {
     
     # Loads the time series data
@@ -69,7 +72,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "Columns", choices=names(timeSeries), selected = c("UniqueID", "T0 min", "T0.5 min", "T1 min", "T2 min", "T5 min", "T10 min", "Gene ID", "Gene name"))
     
     
-    # highlight selected rows in the scatterplot and show 3d structure
+    # highlight selected rows in the lineplot and show 3d structure
     observeEvent(input$overviewTable_rows_selected, ignoreNULL = FALSE, {
         s = input$overviewTable_rows_selected
         # Remove PDB and Plot
@@ -145,7 +148,8 @@ server <- function(input, output, session) {
                     }
                 })
             } else {
-                # Show warning message
+              # Show warning message
+              
             }
         }
     }
@@ -170,10 +174,8 @@ server <- function(input, output, session) {
                     columnDefs = 
                         list(
                         list(targets = columnNumbers, visible = FALSE),
-                    # ),
-                    list(
-                            targets = "_all",
-                            render = JS(
+                        list(targets = "_all",
+                             render = JS(
                                 "function(data, type, row, meta) {",
                                 "return type === 'display' && data != null && data.length > 25 ?",
                                 "'<span title=\"' + data + '\">' + data.substr(0, 25) + '...</span>' : data;",
