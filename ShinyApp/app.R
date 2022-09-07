@@ -89,7 +89,6 @@ server <- function(input, output, session) {
         output$pdb = NULL
         output$chartMultiple = NULL
         if (!is.null(s)) {
-            
                 # Chart plot
                 output$chart = renderPlot({
                     # Obtain the rows selected
@@ -110,12 +109,13 @@ server <- function(input, output, session) {
                 })
             
             # If only 1 is selected we can show the 3d plot
-            if (length(s) == 1) {
-                
+            # if (length(s) == 1) {
+                # Check if the ones selected are from the same 3d structure
+            if (length(unique(timeSeries[s,]$Structure)) == 1) {
                 # Create PDB plot
-                output$pdb <- renderR3dmol({
-                    highlight = timeSeries[s,]$`Amino acid`
-                    pdb_file = paste0("./data/pdb/",timeSeries[s,]$Structure,".pdb")
+                expression <-
+                    {
+                    pdb_file = paste0("./data/pdb/",unique(timeSeries[s,]$Structure),".pdb")
                     print(paste("Row",s, "Loading", pdb_file))
                     if (file.exists(pdb_file)) {
                         r3dmol(
@@ -142,20 +142,21 @@ server <- function(input, output, session) {
                             m_set_style(
                                 sel = m_sel(ss = "h"), # Style alpha helix
                                 style = m_style_cartoon(color = "#ff7f0e")
-                            ) %>%
-                            # Rotate the scene by given angle on given axis
-                            m_rotate(angle = 90, axis = "y") %>%
-                            # Animate the scene by spinning it
-                            # m_spin() %>%
-                            # Label selection for specific sites
+                            )
+                        }
+                    }
+                    highlight = c(timeSeries[s,]$`Amino acid`)
+                    for (i in highlight) {
+                        expression <- expression %>%
                             m_add_sphere(
                                 text = "The middle of the selection",
-                                center = m_sel(resi = highlight), 
-                                spec = m_shape_spec(color = "grey", wireframe = TRUE),
+                                center = m_sel(resi = c(i)),
+                                spec = m_shape_spec(color = "pink", wireframe = TRUE),
                                 radius = 2.5
                             )
                     }
-                })
+                
+                output$pdb <- renderR3dmol(expression)
             } else {
               # Show warning message
               
