@@ -19,7 +19,8 @@ ui <- dashboardPage(
     dashboardSidebar(id = "",
                      sidebarMenu(
                          menuItem("Overview", tabName = "overview"),
-                         menuItem("Time series", tabName = "time")
+                         menuItem("Time series", tabName = "time"),
+                         menuItem("Help", tabName = "help")
                      )),
     
     dashboardBody(
@@ -49,7 +50,15 @@ ui <- dashboardPage(
         tabItem(tabName = "overview", h2("Overview"), br(),
                 h4(strong("Background")), p("Background information here."), br(), 
                 h4(strong("Experimental data")), p("Data in this database."), br(),
-                h4(strong("References")), p("Add references here.") )
+                h4(strong("References")), p("Add references here.") 
+        ),
+        
+        # 'Help' tab content
+        tabItem(tabName = "help", h2("Help"), br(),
+                h4(strong("Visualizations")), p("The different visualizations"), br(), 
+                h4(strong("Searching")), p("How to search"), br(),
+                h4(strong("Contact")), p("Contact details here.") 
+        )
         
     )
     )
