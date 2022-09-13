@@ -19,7 +19,8 @@ ui <- dashboardPage(
     dashboardSidebar(id = "",
                      sidebarMenu(
                          menuItem("Overview", tabName = "overview"),
-                         menuItem("Time series", tabName = "time"),
+                         menuItem("Phosphoproteomes", tabName = "time"),
+                         menuItem("Orthogroups", tabName = "ortho"),
                          menuItem("Help", tabName = "help")
                      )),
     
@@ -35,23 +36,33 @@ ui <- dashboardPage(
         
         tabItems(
 
-        # 'Time series' tab content
+        # 'Overview' tab content
+        tabItem(tabName = "overview", 
+                h2(strong("AuxPhos (AUXin PHOSphoproteomics resource)")), br(), 
+                h4(strong("Background")), p("The naturally occurring plant hormone auxin (indole 3-acetic acid (IAA)) is found in some prokaryotes and eukaryotes but in all the land plants studied to date. IAA can trigger a wide range of responses that in turn affect plant growth and development. However, all these responses studied so far were observed to occur through the Nuclear Auxin Pathway (NAP), a transcriptional meachanism where auxin promotes interaction of Aux/IAA transcriptional inhibitors with a ubiquitin ligase complex (SCF-TIR1/AFB) to promote Aux/IAA protein degradation. With this, the DNA-binding ARF transcription factors transcriptionally control their many target genes to elicit the auxin dependent responses. However, the first IAA-induced transcripts are visible around 10 minutes after IAA treatment, making it unlikely for NAP to account for the changes in e.g. ion fluxes, cellular growth and subcellular traffic that have been observed to occur within seconds to minutes. In an effort to identify the mechanisms underlying these rapid responses, we explored the possible role of protein phosphorylation by studying the rapid phosphorylation changes across multiple plant species and mutant alleles of some of the genes expected to be involved in these responses."), br(), 
+                h4(strong("Experimental data")), p("In the table below, details about the various auxin treatments across species and the mutants are given. 'Dataset' contains the short name used across the database. 'Species/ecotype/mutant' refers to the plant genetic background from which this particular dataset has been geenrated. 'Treatment' shows the concentration and the hormone/chemical used for treatment, otherwise given as Mock. 'Phosphosites' shows the number of total peptides found in that dataset."), br(),
+                p("Show table here"), br(),
+                h4(strong("Data accessibility")), p("Through the 'Phosphoproteomes' page, all the data mentioned in the section above can be accessed, whereas 'Orthogroups' page contains a lookup table showing the clustering of orthogroups from various species, shown in the 'Phosphoproteomes' page. Please refer to the 'Help' page for detailed usage instructions of AuxPhos tool. However, if you are interested in using this app instance on your own computer, we recommend looking at the instructions provided in the AuxPhos GitHub respository here (https://github.com/sumanthmutte/AuxPhos)."), br(), 
+                h4(strong("References")), p("Roosjen M, Kuhn A et al., in preparation.") 
+        ),
+          
+
+        # 'Phosphoproteomes' tab content
         tabItem(
-            tabName = "time",h2("Time series data"),
+            tabName = "time",h2("Phosphoproteome data"),
             selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE, width = '100%'),
             fluidRow(column(12, div(DT::dataTableOutput("overviewTable")))),
             fluidRow(column(6, plotOutput("chart"), style='padding-top:30px; padding-bottom:10px'),
             fluidRow(column(6, r3dmolOutput("pdb"), style='padding-top:30px; padding-bottom:10px'))
             )
-            
+        ),
+
+        
+        # 'Orthogroups' tab content
+        tabItem(
+          tabName = "ortho",h2("Orthogroups"),
         ),
         
-        # 'Overview' tab content
-        tabItem(tabName = "overview", h2("Overview"), br(),
-                h4(strong("Background")), p("Background information here."), br(), 
-                h4(strong("Experimental data")), p("Data in this database."), br(),
-                h4(strong("References")), p("Add references here.") 
-        ),
         
         # 'Help' tab content
         tabItem(tabName = "help", h2("Help"), br(),
@@ -68,7 +79,7 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
     
     # Loads the time series data
-    timeSeries <- data.table::fread("./data/timeseries.tsv",header = TRUE, sep = "\t")
+    timeSeries <- data.table::fread("./data/PhosphoData_AuxPhos.csv",header = TRUE, sep = "\t")
 
     output$picker <- renderUI({
         pickerInput(inputId = 'pick', 
@@ -78,7 +89,7 @@ server <- function(input, output, session) {
     })        
     
     # Selected by default
-    updateSelectInput(session, "Columns", choices=names(timeSeries), selected = c("UniqueID", "T0 min", "T0.5 min", "T1 min", "T2 min", "T5 min", "T10 min", "Gene ID", "Gene name"))
+    updateSelectInput(session, "Columns", choices=names(timeSeries), selected = c("UniqueID", "Dataset", "T0.5 min", "T1 min", "T2 min", "T5 min", "T10 min", "Gene ID", "Gene Name", "Orthogroup"))
     
     
     # highlight selected rows in the lineplot and show 3d structure
@@ -94,7 +105,7 @@ server <- function(input, output, session) {
                     # Obtain the rows selected
                     rowData <- timeSeries[s,]
                     # Reduce columns to the selected few
-                    rowData <- rowData %>% select(1, 2,3,4,5,6,7)
+                    rowData <- rowData %>% select(3,4,5,6,7,8,9)
                     # print(colnames(rowData))
                     # Turn into 3 columns for ggplot
                     df_melted = melt(rowData, id.vars = 'UniqueID')
