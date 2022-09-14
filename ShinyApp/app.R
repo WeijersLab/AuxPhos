@@ -38,12 +38,12 @@ ui <- dashboardPage(
 
         # 'Overview' tab content
         tabItem(tabName = "overview", 
-                h2(strong("AuxPhos (AUXin PHOSphoproteomics resource)")), br(), 
+                h2(strong("AuxPhos (AUXin PHOSphoproteomics resource)"), align='center'), br(), 
                 h4(strong("Background")), p("The naturally occurring plant hormone auxin (indole 3-acetic acid (IAA)) is found in some prokaryotes and eukaryotes but in all the land plants studied to date. IAA can trigger a wide range of responses that in turn affect plant growth and development. However, all these responses studied so far were observed to occur through the Nuclear Auxin Pathway (NAP), a transcriptional meachanism where auxin promotes interaction of Aux/IAA transcriptional inhibitors with a ubiquitin ligase complex (SCF-TIR1/AFB) to promote Aux/IAA protein degradation. With this, the DNA-binding ARF transcription factors transcriptionally control their many target genes to elicit the auxin dependent responses. However, the first IAA-induced transcripts are visible around 10 minutes after IAA treatment, making it unlikely for NAP to account for the changes in e.g. ion fluxes, cellular growth and subcellular traffic that have been observed to occur within seconds to minutes. In an effort to identify the mechanisms underlying these rapid responses, we explored the possible role of protein phosphorylation by studying the rapid phosphorylation changes across multiple plant species and mutant alleles of some of the genes expected to be involved in these responses."), br(), 
-                h4(strong("Experimental data")), p("In the table below, details about the various auxin treatments across species and the mutants are given. 'Dataset' contains the short name used across the database. 'Species/ecotype/mutant' refers to the plant genetic background from which this particular dataset has been geenrated. 'Treatment' shows the concentration and the hormone/chemical used for treatment, otherwise given as Mock. 'Phosphosites' shows the number of total peptides found in that dataset."), br(),
-                p("Show table here"), br(),
-                h4(strong("Data accessibility")), p("Through the 'Phosphoproteomes' page, all the data mentioned in the section above can be accessed, whereas 'Orthogroups' page contains a lookup table showing the clustering of orthogroups from various species, shown in the 'Phosphoproteomes' page. Please refer to the 'Help' page for detailed usage instructions of AuxPhos tool. However, if you are interested in using this app instance on your own computer, we recommend looking at the instructions provided in the AuxPhos GitHub respository here (https://github.com/sumanthmutte/AuxPhos)."), br(), 
-                h4(strong("References")), p("Roosjen M, Kuhn A et al., in preparation.") 
+                h4(strong("Experimental data")), p("In the table below, details about the various auxin treatments across species and the mutants are given. 'Dataset' contains the short name used across the database. 'Species/ecotype/mutant' refers to the plant genetic background from which this particular dataset has been generated. 'Treatment' shows the concentration and the hormone/chemical used for treatment, otherwise given as Mock. 'Phosphosites' shows the number of total peptides found in that dataset."), br(),
+                fluidRow(column(12, align="center", div(DT::dataTableOutput("samplesTable")))), br(),
+                h4(strong("Data accessibility")), p("Through the 'Phosphoproteomes' page, all the data mentioned in the section above can be accessed, whereas 'Orthogroups' page contains a lookup table showing the clustering of orthogroups from various species, shown in the 'Phosphoproteomes' page. Please refer to the 'Help' page for detailed usage instructions of AuxPhos tool. However, if you are interested in using this app instance on your own computer, we recommend looking at the instructions provided in the AuxPhos GitHub respository here: https://github.com/sumanthmutte/AuxPhos)."), br(), 
+                h4(strong("References")), p("Roosjen M, Kuhn A et al., in preparation."), br() 
         ),
           
 
@@ -61,6 +61,8 @@ ui <- dashboardPage(
         # 'Orthogroups' tab content
         tabItem(
           tabName = "ortho",h2("Orthogroups"),
+          p("Lookup table for genes and corresponding orthogroups incidated in the phosphoproteome data"), br(),
+          fluidRow(column(12, div(DT::dataTableOutput("orthoTable"))))
         ),
         
         
@@ -78,7 +80,47 @@ ui <- dashboardPage(
 # Define server logic
 server <- function(input, output, session) {
     
-    # Loads the time series data
+    # Load the samples file for overview page
+    dataSamples <- data.table::fread("./data/Samples_AuxPhos.csv",header = TRUE, sep = "\t", stringsAsFactors = T)
+    output$samplesTable <- DT::renderDT(
+      datatable(
+        data = dataSamples,
+        filter = 'top',
+        rownames= F,
+        options = list(
+          #scrollX = TRUE,   ## enable scrolling on X axis
+          #scrollY = TRUE,   ## enable scrolling on Y axis
+          #autoWidth = TRUE, ## use smart column width handling
+          columnDefs = 
+            list(
+              list(className = 'dt-center', targets = "_all")
+            )
+        ),
+      ))
+    
+
+    # Load the orthogroups file
+    dataOrthogroups <- data.table::fread("./data/Orthogroups_AuxPhos.csv",header = TRUE, sep = "\t")
+    output$orthoTable <- DT::renderDT(
+      datatable(
+        data = dataOrthogroups,
+        filter = 'top',
+        rownames= F,
+        options = list(
+          autoWidth = TRUE, ## use smart column width handling
+          columnDefs = 
+            list(
+              list(targets = "_all",
+                   render = JS(
+                     "function(data, type, row, meta) {",
+                     "return type === 'display' && data != null && data.length > 25 ?",
+                     "'<span title=\"' + data + '\">' + data.substr(0, 25) + '...</span>' : data;",
+                     "}")))
+        ),
+      ))
+    
+    
+    # Loads the phosphoproteome data (time series + other species + mutants)
     timeSeries <- data.table::fread("./data/PhosphoData_AuxPhos.csv",header = TRUE, sep = "\t")
 
     output$picker <- renderUI({
