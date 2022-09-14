@@ -21,6 +21,6 @@ Col0-2min-1NAA1uM	A. thaliana	Col-0	1uM 1-NAA	1883
 Col0-2min-2NAA1uM	A. thaliana	Col-0	1uM 2-NAA	2336
 Col0-2min-BA1uM	A. thaliana	Col-0	1uM Butyric acid	576
 Col0-2min-24D	A. thaliana	Col-0	100nM 2,4-D	932
-Physco-2min-IAA	P. patens	Col-0	100nM IAA	847
-Knitens-2min-IAA	K. nitens	Col-0	100nM IAA	1231
-Penium-2min-IAA	P. margaritaceum	Col-0	100nM IAA	1404
+Physco-2min-IAA	P. patens	Wildtype	100nM IAA	847
+Knitens-2min-IAA	K. nitens	Wildtype	100nM IAA	1231
+Penium-2min-IAA	P. margaritaceum	Wildtype	100nM IAA	1404

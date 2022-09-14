@@ -52,8 +52,8 @@ ui <- dashboardPage(
             tabName = "time",h2("Phosphoproteome data"),
             selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE, width = '100%'),
             fluidRow(column(12, div(DT::dataTableOutput("overviewTable")))),
-            fluidRow(column(6, plotOutput("chart"), style='padding-top:30px; padding-bottom:10px'),
-            fluidRow(column(6, r3dmolOutput("pdb"), style='padding-top:30px; padding-bottom:10px'))
+            fluidRow(column(6, align="center", downloadButton('downloadPlot','Download Plot'), plotOutput("chart"), style='padding-top:30px; padding-bottom:10px'),
+            fluidRow(column(6, align="center", downloadButton('downloadImage','Download Image'), r3dmolOutput("pdb"), style='padding-top:30px; padding-bottom:10px'))
             )
         ),
 
@@ -114,7 +114,7 @@ server <- function(input, output, session) {
           searchHighlight = TRUE,
           columnDefs =
             list(
-              list(width = '5%', targets = c(0)),
+              list(width = '5%', targets = 0),
               list(targets = "_all",
                    render = JS(
                      "function(data, type, row, meta) {",
@@ -141,7 +141,7 @@ server <- function(input, output, session) {
     # Selected by default
     updateSelectInput(session, "Columns", choices=names(timeSeries), selected = c("UniqueID", "Dataset", "T0.5 min", "T1 min", "T2 min", "T5 min", "T10 min", "Gene ID", "Gene Name", "Orthogroup"))
     
-    
+    data2 <- reactiveValues()
     # highlight selected rows in the lineplot and show 3d structure
     observeEvent(input$overviewTable_rows_selected, ignoreNULL = FALSE, {
         s = input$overviewTable_rows_selected
@@ -150,25 +150,35 @@ server <- function(input, output, session) {
         output$pdb = NULL
         output$chartMultiple = NULL
         if (!is.null(s)) {
+          
+          # Obtain the rows selected
+          rowData <- timeSeries[s,]
+          # Reduce columns to the selected few
+          rowData <- rowData %>% select(3,4,5,6,7,8,9)
+          # print(colnames(rowData))
+          # Turn into 3 columns for ggplot
+          df_melted = melt(rowData, id.vars = 'UniqueID')
+          # Plot
+          data2$plotObject = ggplot(df_melted, aes(x = variable, y = value)) + 
+            geom_point(aes(color = UniqueID, group = UniqueID), size=3.5) +
+            geom_line(aes(color = UniqueID, group = UniqueID), size=1.2) +
+            xlab("Time points") + ylab("Normalized ratio") + theme_bw() + 
+            theme(legend.position="bottom", 
+                  axis.title.x = element_text(size=14, face="bold", vjust = -1),
+                  axis.title.y = element_text(size=14, face="bold"),
+                  axis.text.x = element_text(size=12),
+                  axis.text.y = element_text(size=12))
+          
                 # Chart plot
-                output$chart = renderPlot({
-                    # Obtain the rows selected
-                    rowData <- timeSeries[s,]
-                    # Reduce columns to the selected few
-                    rowData <- rowData %>% select(3,4,5,6,7,8,9)
-                    # print(colnames(rowData))
-                    # Turn into 3 columns for ggplot
-                    df_melted = melt(rowData, id.vars = 'UniqueID')
-                    # Plot
-                    ggplot(df_melted, aes(x = variable, y = value)) + geom_line(aes(color = UniqueID, group = UniqueID), size=1.2) +
-                    xlab("Time points") + ylab("Normalized ratio") + theme_bw() + 
-                    theme(legend.position="bottom", 
-                          axis.title.x = element_text(size=14, face="bold", vjust = -1),
-                          axis.title.y = element_text(size=14, face="bold"),
-                          axis.text.x = element_text(size=12),
-                          axis.text.y = element_text(size=12))
-                })
+                output$chart = renderPlot({ data2$plotObject })
             
+                # Save plot
+                output$downloadPlot <- downloadHandler(
+                  filename = "AuxPhosPlot.svg",
+                  content = function(file){
+                    ggsave(file,plot=data2$plotObject,device="svg",width = 10, height = 6)
+                  })
+                
             # If only 1 is selected we can show the 3d plot
             # if (length(s) == 1) {
                 # Check if the ones selected are from the same 3d structure
@@ -212,12 +222,25 @@ server <- function(input, output, session) {
                             m_add_sphere(
                                 text = "The middle of the selection",
                                 center = m_sel(resi = c(i)),
-                                spec = m_shape_spec(color = "pink", wireframe = TRUE),
+                                spec = m_shape_spec(color = "red", wireframe = TRUE),
                                 radius = 2.5
                             )
                     }
                 
                 output$pdb <- renderR3dmol(expression)
+                
+                data2$imageObject <- renderImage({
+                  renderR3dmol(expression) %>% m_png()
+                })
+                
+                # Save image
+                output$downloadImage <- downloadHandler(
+                  filename = "AuxPhosImage.png",
+                  content = function(file){
+                    data2$imageObject
+                  })
+                
+                
             } else {
               # Show warning message
               
@@ -249,16 +272,14 @@ server <- function(input, output, session) {
                         list(targets = "_all",
                              render = JS(
                                 "function(data, type, row, meta) {",
-                                "return type === 'display' && data != null && data.length > 25 ?",
-                                "'<span title=\"' + data + '\">' + data.substr(0, 25) + '...</span>' : data;",
+                                "return type === 'display' && data != null && data.length > 35 ?",
+                                "'<span title=\"' + data + '\">' + data.substr(0, 35) + '...</span>' : data;",
                                 "}"))),
-                    deferRender = TRUE,
                     dom = "Blfrtip",
-                    buttons = c('selectAll', 'selectNone','copy', 'csv', 'excel')
-                    
+                    buttons = c('selectNone','copy', 'csv', 'excel')   # 'selectAll', 
                 ),
                 selection="none"
-            )#, server = F
+            ), server = F
             )
     })
 }
