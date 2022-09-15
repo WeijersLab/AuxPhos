@@ -11,6 +11,7 @@ library(r3dmol)
 library(dplyr)
 library(ggplot2)
 library(reshape2)
+library(svglite)
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
