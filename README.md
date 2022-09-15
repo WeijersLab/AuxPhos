@@ -17,12 +17,13 @@ For some technical reason (or the ease of access), if you are interested in usin
 - dplyr
 - ggplot2
 - reshape2
+- svglite
 
 **Load AuxPhos from R:**
 
 - Download the whole 'ShinyApp' directory from files above
 - If your 'ShinyApp' directory is in 'Downloads', then type `Rscript -e "library(methods); shiny::runApp('~/Downloads/ShinyApp', launch.browser = TRUE)"` in your terminal window.
-- AuxPhos tool is now launched in your favourite browser
+- AuxPhos tool is now launched in your deafult web browser
 	
 **Load AuxPhos from Rstudio:**
 
