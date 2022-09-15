@@ -224,7 +224,15 @@ server <- function(input, output, session) {
                                 center = m_sel(resi = c(i)),
                                 spec = m_shape_spec(color = "red", wireframe = TRUE),
                                 radius = 2.5
+                            ) %>%
+                          m_add_label(
+                            text = i,
+                            sel = m_sel(resi = c(i)),
+                            style = m_style_label(
+                              backgroundColor = "#666666",
+                              backgroundOpacity = 0.9
                             )
+                          )
                     }
                 
                 output$pdb <- renderR3dmol(expression)
