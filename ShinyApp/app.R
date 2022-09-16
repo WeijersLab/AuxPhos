@@ -115,13 +115,9 @@ server <- function(input, output, session) {
           searchHighlight = TRUE,
           columnDefs =
             list(
-              list(width = '5%', targets = 0),
-              list(targets = "_all",
-                   render = JS(
-                     "function(data, type, row, meta) {",
-                     "return type === 'display' && data != null && data.length > 30 ?",
-                     "'<span title=\"' + data + '\">' + data.substr(0, 30) + '...</span>' : data;",
-                     "}"))),
+              list(width = '10%', targets = 0),
+              list(width = '18%', targets = c(1,2,3,4,5))
+            ),
           dom = "Blfrtip",
           buttons = c('selectAll', 'selectNone','copy', 'csv', 'excel')
         ),
@@ -267,11 +263,11 @@ server <- function(input, output, session) {
         output$overviewTable <- DT::renderDT(
             datatable(
                 data = timeSeries,
-                extensions = c('Select','Buttons'),
+                extensions = c('Buttons'),  # 'Select',
                 filter = 'top',
                 rownames= T,
                 options = list(
-                    select = list(style = "multi", items = "row"),
+                    #select = list(style = "multi", items = "row"),
                     scrollX = TRUE,   ## enable scrolling on X axis
                     scrollY = TRUE,   ## enable scrolling on Y axis
                     autoWidth = TRUE, ## use smart column width handling
@@ -285,10 +281,10 @@ server <- function(input, output, session) {
                                 "'<span title=\"' + data + '\">' + data.substr(0, 35) + '...</span>' : data;",
                                 "}"))),
                     dom = "Blfrtip",
-                    buttons = c('selectNone','copy', 'csv', 'excel')   # 'selectAll', 
+                    buttons = c('copy', 'csv', 'excel')   # 'selectAll', 'selectNone',
                 ),
-                selection="none"
-            ), server = F
+                #selection="none"
+            ), server = T
             )
     })
 }
