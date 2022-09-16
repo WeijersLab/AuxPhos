@@ -12,6 +12,8 @@ library(dplyr)
 library(ggplot2)
 library(reshape2)
 library(svglite)
+library(shinycssloaders)
+
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
@@ -52,7 +54,7 @@ ui <- dashboardPage(
         tabItem(
             tabName = "time",h2("Phosphoproteome data"),
             selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE, width = '100%'),
-            fluidRow(column(12, div(DT::dataTableOutput("overviewTable")))),
+            fluidRow(column(12, div(withSpinner(DT::dataTableOutput("overviewTable"))))),
             fluidRow(column(6, align="center", downloadButton('downloadPlot','Download Plot'), plotOutput("chart"), style='padding-top:30px; padding-bottom:10px'),
             fluidRow(column(6, align="center", downloadButton('downloadImage','Download Image'), r3dmolOutput("pdb"), style='padding-top:30px; padding-bottom:10px'))
             )
@@ -257,17 +259,15 @@ server <- function(input, output, session) {
     
     # Column filtering changing the data table
     observeEvent(input$Columns, {
-        textLimit <- which(names(timeSeries) %in% c("Gene description"))
-        print(textLimit)
         columnNumbers <- which(!names(timeSeries) %in% input$Columns)
         output$overviewTable <- DT::renderDT(
             datatable(
                 data = timeSeries,
-                extensions = c('Buttons'),  # 'Select',
+                extensions = c('Select','Buttons'),
                 filter = 'top',
                 rownames= T,
                 options = list(
-                    #select = list(style = "multi", items = "row"),
+                    select = list(style = "multi", items = "row"),
                     scrollX = TRUE,   ## enable scrolling on X axis
                     scrollY = TRUE,   ## enable scrolling on Y axis
                     autoWidth = TRUE, ## use smart column width handling
@@ -281,10 +281,10 @@ server <- function(input, output, session) {
                                 "'<span title=\"' + data + '\">' + data.substr(0, 35) + '...</span>' : data;",
                                 "}"))),
                     dom = "Blfrtip",
-                    buttons = c('copy', 'csv', 'excel')   # 'selectAll', 'selectNone',
+                    buttons = c('selectAll', 'selectNone','copy', 'csv', 'excel')
                 ),
-                #selection="none"
-            ), server = T
+                selection="none"
+            ), server = F
             )
     })
 }
