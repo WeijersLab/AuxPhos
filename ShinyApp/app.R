@@ -14,6 +14,30 @@ library(reshape2)
 library(svglite)
 library(shinycssloaders)
 
+js <- "
+function openFullscreen(elem) {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) { /* Firefox */
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE/Edge */
+    elem.msRequestFullscreen();
+  }
+}"
+
+css <- "
+#ggplot:-webkit-full-screen {
+  height: 100%;
+  margin: 0;
+}
+#ggplot:-ms-fullscreen {
+  height: 100%;
+}
+#ggplot:fullscreen {
+  height: 100%;
+}"
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
@@ -35,7 +59,10 @@ ui <- dashboardPage(
                                 .content-wrapper, .right-side {
                                 background-color: #ffffff;
                                 }
-                                '))),
+                                ')),
+                  tags$script(HTML(js)),
+                  tags$style(HTML(css))
+                  ),
         
         tabItems(
 
@@ -56,7 +83,8 @@ ui <- dashboardPage(
             selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE, width = '100%'),
             fluidRow(column(12, div(withSpinner(DT::dataTableOutput("overviewTable"))))),
             fluidRow(column(6, align="center", downloadButton('downloadPlot','Download Plot'), plotOutput("chart"), style='padding-top:30px; padding-bottom:10px'),
-            fluidRow(column(6, align="center", downloadButton('downloadImage','Download Image'), r3dmolOutput("pdb"), style='padding-top:30px; padding-bottom:10px'))
+            fluidRow(column(6, align="center", actionButton("fs", "Full screen", onclick = "openFullscreen(document.getElementById('pdb'));"), 
+              r3dmolOutput("pdb"), style='padding-top:30px; padding-bottom:10px'))
             )
         ),
 
@@ -236,22 +264,55 @@ server <- function(input, output, session) {
                 
                 output$pdb <- renderR3dmol(expression)
                 
-                data2$imageObject <- renderImage({
-                  renderR3dmol(expression) %>% m_png()
-                })
-                
-                # Save image
-                output$downloadImage <- downloadHandler(
-                  filename = "AuxPhosImage.png",
-                  content = function(file){
-                    data2$imageObject
-                  })
+                # data2$imageObject <- renderImage({
+                #   renderR3dmol(expression) %>% m_png()
+                # })
+                # 
+                # # Save image
+                # output$downloadImage <- downloadHandler(
+                #   filename = "AuxPhosImage.png",
+                #   content = function(file){
+                #     data2$imageObject
+                #   })
                 
                 
             } else {
               # Show warning message
+              expression = r3dmol(
+                viewer_spec = m_viewer_spec(
+                  cartoonQuality = 10,
+                  lowerZoomLimit = 50,
+                  upperZoomLimit = 350
+                )) %>% 
+                m_add_label(
+                  text = "Select one structure",
+                  sel = m_vector3(-6.89, 0.75, 0.35),
+                  style = m_style_label(
+                    backgroundColor = "#666666",
+                    backgroundOpacity = 0.9
+                  )
+                )
               
+              
+              output$pdb <- renderR3dmol(expression)
             }
+        } else {
+          # Show warning message
+          expression = r3dmol(
+            viewer_spec = m_viewer_spec(
+              cartoonQuality = 10,
+              lowerZoomLimit = 50,
+              upperZoomLimit = 350
+            )) %>% 
+            m_add_label(
+              text = "Select one structure",
+              sel = m_vector3(-6.89, 0.75, 0.35),
+              style = m_style_label(
+                backgroundColor = "#666666",
+                backgroundOpacity = 0.9
+              )
+            )
+          output$pdb <- renderR3dmol(expression)
         }
     }
     )
