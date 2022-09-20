@@ -124,9 +124,10 @@ server <- function(input, output, session) {
           columnDefs = list(list(className = 'dt-center', targets = "_all")),
           dom = "Blfrtip",
           buttons = c('selectAll', 'selectNone','copy', 'csv', 'excel')
-          ),
+        ),
         selection="none"
-      ))
+      )
+    )
     
 
     # Load the orthogroups file
@@ -152,21 +153,23 @@ server <- function(input, output, session) {
           buttons = c('selectAll', 'selectNone','copy', 'csv', 'excel')
         ),
         selection="none"
-      ))
+      )
+    )
     
     
     # Loads the phosphoproteome data (time series + other species + mutants)
-    timeSeries <- data.table::fread("./data/PhosphoData_AuxPhos.csv",header = TRUE, sep = "\t", colClasses=c(Dataset="factor"))
-
+    timeSeries <- data.table::fread("./data/PhosphoData_AuxPhos_trimmed.csv",header = TRUE, sep = "\t", colClasses=c(Dataset="factor"), na.strings = NULL)
     output$picker <- renderUI({
-        pickerInput(inputId = 'pick', 
-                    label = 'Choose', 
-                    choices = colnames(timeSeries),
-                    options = list(`actions-box` = TRUE),multiple = T)
-    })        
+      pickerInput(inputId = 'pick',
+                  label = 'Choose', 
+                  choices = colnames(timeSeries),
+                  options = list(`actions-box` = TRUE),multiple = T)
+      })        
     
     # Selected by default
-    updateSelectInput(session, "Columns", choices=names(timeSeries), selected = c("UniqueID", "Dataset", "T0.5 min", "T1 min", "T2 min", "T5 min", "T10 min", "Gene ID", "Gene Name", "Orthogroup"))
+    updateSelectInput(session, "Columns", choices=names(timeSeries), 
+                      selected = c("UniqueID", "Dataset", "T0.5 min", "T1 min", "T2 min", "T5 min", "T10 min", "Gene ID", "Gene Name", "Orthogroup")
+                      )
     
     data2 <- reactiveValues()
     # highlight selected rows in the lineplot and show 3d structure
@@ -182,7 +185,6 @@ server <- function(input, output, session) {
           rowData <- timeSeries[s,]
           # Reduce columns to the selected few
           rowData <- rowData %>% select(3,4,5,6,7,8,9)
-          # print(colnames(rowData))
           # Turn into 3 columns for ggplot
           df_melted = melt(rowData, id.vars = 'UniqueID')
           # Plot
@@ -196,128 +198,69 @@ server <- function(input, output, session) {
                   axis.text.x = element_text(size=12),
                   axis.text.y = element_text(size=12))
           
-                # Chart plot
-                output$chart = renderPlot({ data2$plotObject })
+          # Chart plot
+          output$chart = renderPlot({ data2$plotObject })
             
-                # Save plot
-                output$downloadPlot <- downloadHandler(
-                  filename = "AuxPhosPlot.svg",
-                  content = function(file){
-                    ggsave(file,plot=data2$plotObject,device="svg",width = 10, height = 6)
-                  })
-                
-            # If only 1 is selected we can show the 3d plot
-            # if (length(s) == 1) {
-                # Check if the ones selected are from the same 3d structure
-            if (length(unique(timeSeries[s,]$Structure)) == 1) {
-                # Create PDB plot
-                expression <-
-                    {
-                    pdb_file = paste0("./data/pdb/",unique(timeSeries[s,]$Structure),".pdb")
-                    print(paste("Row",s, "Loading", pdb_file))
-                    if (file.exists(pdb_file)) {
-                        r3dmol(
-                            viewer_spec = m_viewer_spec(
-                                cartoonQuality = 10,
-                                lowerZoomLimit = 50,
-                                upperZoomLimit = 350
-                            ),
-                            # id = "demo2",
-                            # elementId = "demo2"
-                        ) %>%
-                            # Add model to scene
-                            m_add_model(data = pdb_file, format = "pdb") %>%
-                            # Zoom to encompass the whole scene
-                            m_zoom_to() %>%
-                            # Set style of structures
-                            m_set_style(style = m_style_cartoon(color = "#00cc96")) %>%
-                            # Set style of specific selection (selecting by secondary)
-                            m_set_style(
-                                sel = m_sel(ss = "s"),
-                                style = m_style_cartoon(color = "#636efa", arrows = TRUE)
-                            ) %>%
-                            # Style the alpha helix
-                            m_set_style(
-                                sel = m_sel(ss = "h"), # Style alpha helix
-                                style = m_style_cartoon(color = "#ff7f0e")
-                            )
-                        }
-                    }
-                    highlight = c(timeSeries[s,]$Position)
-                    for (i in highlight) {
-                        expression <- expression %>%
-                            m_add_sphere(
-                                text = "The middle of the selection",
-                                center = m_sel(resi = c(i)),
-                                spec = m_shape_spec(color = "red", wireframe = TRUE),
-                                radius = 2.5
-                            ) %>%
-                          m_add_label(
-                            text = i,
-                            sel = m_sel(resi = c(i)),
-                            style = m_style_label(
-                              backgroundColor = "#666666",
-                              backgroundOpacity = 0.9
-                            )
-                          )
-                    }
-                
-                output$pdb <- renderR3dmol(expression)
-                
-                # data2$imageObject <- renderImage({
-                #   renderR3dmol(expression) %>% m_png()
-                # })
-                # 
-                # # Save image
-                # output$downloadImage <- downloadHandler(
-                #   filename = "AuxPhosImage.png",
-                #   content = function(file){
-                #     data2$imageObject
-                #   })
-                
-                
-            } else {
-              # Show warning message
-              expression = r3dmol(
-                viewer_spec = m_viewer_spec(
-                  cartoonQuality = 10,
-                  lowerZoomLimit = 50,
-                  upperZoomLimit = 350
-                )) %>% 
-                m_add_label(
-                  text = "Select one structure",
-                  sel = m_vector3(-6.89, 0.75, 0.35),
-                  style = m_style_label(
-                    backgroundColor = "#666666",
-                    backgroundOpacity = 0.9
-                  )
-                )
-              
-              
-              output$pdb <- renderR3dmol(expression)
-            }
-        } else {
-          # Show warning message
-          expression = r3dmol(
-            viewer_spec = m_viewer_spec(
-              cartoonQuality = 10,
-              lowerZoomLimit = 50,
-              upperZoomLimit = 350
-            )) %>% 
-            m_add_label(
-              text = "Select one structure",
-              sel = m_vector3(-6.89, 0.75, 0.35),
-              style = m_style_label(
-                backgroundColor = "#666666",
-                backgroundOpacity = 0.9
-              )
+          # Save plot
+          output$downloadPlot <- downloadHandler(
+            filename = "AuxPhosPlot.svg",
+            content = function(file){ ggsave(file,plot=data2$plotObject,device="svg",width = 10, height = 6) }
             )
+                
+          # Check if the ones selected are from the same 3d structure
+          if (length(unique(timeSeries[s,]$Structure)) == 1) {
+            
+            # Create PDB plot
+            pdb_file = paste0("./data/pdb/",unique(timeSeries[s,]$Structure),".pdb")
+            print(paste("Row",s, "Loading", pdb_file))
+            highlight = c(timeSeries[s,]$Position)
+              
+            if (file.exists(pdb_file)) {
+              expression <- {
+                r3dmol( viewer_spec = m_viewer_spec(cartoonQuality = 10, lowerZoomLimit = 50, upperZoomLimit = 350) ) %>%
+                  # Add model to scene
+                  m_add_model(data = pdb_file, format = "pdb") %>%
+                  # Zoom to encompass the whole scene
+                  m_zoom_to() %>%
+                  # Set style of structures
+                  m_set_style(style = m_style_cartoon(color = "#00cc96")) %>%
+                  # Set style of specific selection (selecting by secondary)
+                  m_set_style( sel = m_sel(ss = "s"), style = m_style_cartoon(color = "#636efa", arrows = TRUE) ) %>%
+                  # Style the alpha helix
+                  m_set_style( sel = m_sel(ss = "h"), style = m_style_cartoon(color = "#ff7f0e") ) 
+                }
+                        
+                for (i in highlight) {
+                  expression <- expression %>%
+                    m_add_sphere(
+                      text = "The middle of the selection",
+                      center = m_sel(resi = c(i)),
+                      spec = m_shape_spec(color = "red", wireframe = TRUE),
+                      radius = 2.5 ) %>%
+                    m_add_label(
+                      text = i,
+                      sel = m_sel(resi = c(i)),
+                      style = m_style_label( backgroundColor = "#666666", backgroundOpacity = 0.9 ) )
+                  }
+                
+              output$pdb <- renderR3dmol(expression)
+
+            }
+
+          } else {
+            # Show message
+            expression = r3dmol() %>% m_add_label( text = "Select one structure" )
+            output$pdb <- renderR3dmol(expression)
+        } 
+        } else {
+          # Show message
+          expression = r3dmol() %>% m_add_label( text = "Select one structure" )
           output$pdb <- renderR3dmol(expression)
         }
     }
     )
-    
-    
+
+
     # Column filtering changing the data table
     observeEvent(input$Columns, {
         columnNumbers <- which(!names(timeSeries) %in% input$Columns)
@@ -328,27 +271,20 @@ server <- function(input, output, session) {
                 filter = 'top',
                 rownames= T,
                 options = list(
-                    select = list(style = "multi", items = "row"),
-                    scrollX = TRUE,   ## enable scrolling on X axis
-                    scrollY = TRUE,   ## enable scrolling on Y axis
-                    autoWidth = TRUE, ## use smart column width handling
-                    columnDefs = 
-                        list(
-                        list(targets = columnNumbers, visible = FALSE),
-                        list(targets = "_all",
-                             render = JS(
-                                "function(data, type, row, meta) {",
-                                "return type === 'display' && data != null && data.length > 35 ?",
-                                "'<span title=\"' + data + '\">' + data.substr(0, 35) + '...</span>' : data;",
-                                "}"))),
-                    dom = "Blfrtip",
-                    buttons = c('selectAll', 'selectNone','copy', 'csv', 'excel')
-                ),
+                  select = list(style = "multi", items = "row"),
+                  scrollX = TRUE,   ## enable scrolling on X axis
+                  scrollY = TRUE,   ## enable scrolling on Y axis
+                  autoWidth = TRUE, ## use smart column width handling
+                  columnDefs = list( list(targets = columnNumbers, visible = FALSE) ),
+                  dom = "Blfrtip",
+                  buttons = c('selectAll', 'selectNone','copy', 'csv', 'excel')
+                  ),
                 selection="none"
-            ), server = F
+                ), server = F
             )
-    })
-}
+        })
+    }
 
+    
 # Run the application
 shinyApp(ui = ui, server = server)
