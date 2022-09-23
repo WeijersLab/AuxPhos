@@ -9,15 +9,15 @@ For some technical reason (or the ease of access), if you are interested in usin
 
 **Install R packages (if not installed already):**
 
-- shinydashboard
-- shiny
-- shinyWidgets
-- DT
-- r3dmol
-- dplyr
-- ggplot2
-- reshape2
-- svglite
+- [shinydashboard](https://github.com/rstudio/shinydashboard)
+- [shiny](https://github.com/rstudio/shiny)
+- [shinyWidgets](https://github.com/dreamRs/shinyWidgets)
+- [DT](https://github.com/rstudio/DT)
+- [r3dmol](https://github.com/swsoyee/r3dmol)
+- [dplyr](https://github.com/tidyverse/dplyr)
+- [ggplot2](https://github.com/tidyverse/ggplot2)
+- [reshape2](https://rdocumentation.org/packages/reshape2/versions/1.4.4)
+- [svglite](https://github.com/r-lib/svglite)
 
 **Load AuxPhos from R:**
 
