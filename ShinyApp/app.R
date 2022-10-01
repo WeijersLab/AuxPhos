@@ -79,8 +79,8 @@ ui <- dashboardPage(
 
         # 'Phosphoproteomes' tab content
         tabItem(
-            tabName = "time",h2("Phosphoproteome data"),
-            selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE, width = '100%'),
+            tabName = "time",h2("Phosphoproteome data"),br(),
+            #selectInput("Columns","Columns",choices = NULL, selected = NULL, multiple = TRUE, width = '100%'),
             fluidRow(column(12, div(withSpinner(DT::dataTableOutput("overviewTable"))))),
             fluidRow(column(6, align="center", downloadButton('downloadPlot','Download Plot'), plotOutput("chart"), style='padding-top:30px; padding-bottom:10px'),
             fluidRow(column(6, align="center", actionButton("fs", "Full screen", onclick = "openFullscreen(document.getElementById('pdb'));"), 
@@ -159,17 +159,42 @@ server <- function(input, output, session) {
     
     # Loads the phosphoproteome data (time series + other species + mutants)
     timeSeries <- data.table::fread("./data/PhosphoData_AuxPhos_trimmed.csv",header = TRUE, sep = "\t", colClasses=c(Dataset="factor"), na.strings = NULL)
-    output$picker <- renderUI({
-      pickerInput(inputId = 'pick',
-                  label = 'Choose', 
-                  choices = colnames(timeSeries),
-                  options = list(`actions-box` = TRUE),multiple = T)
-      })        
+    # output$picker <- renderUI({
+    #   pickerInput(inputId = 'pick',
+    #               label = 'Choose', 
+    #               choices = colnames(timeSeries),
+    #               options = list(`actions-box` = TRUE),multiple = T)
+    #   })        
+    # 
+    # # Selected by default
+    # updateSelectInput(session, "Columns", choices=names(timeSeries), 
+    #                   selected = c("UniqueID", "Dataset", "T0.5 min", "T1 min", "T2 min", "T5 min", "T10 min", "Gene ID", "Gene Name", "Orthogroup")
+    #                   )
+    # Column filtering changing the data table
+    #    observeEvent(input$Columns, {
+    #        columnNumbers <- which(!names(timeSeries) %in% input$Columns)
+    output$overviewTable <- DT::renderDT(
+      datatable(
+        data = timeSeries,
+        extensions = c('Select','Buttons'),
+        filter = 'top',
+        rownames= F,
+        options = list(
+          select = list(style = "os", items = "row"),
+          scrollX = TRUE,   ## enable scrolling on X axis
+          scrollY = TRUE,   ## enable scrolling on Y axis
+          autoWidth = TRUE, ## use smart column width handling
+          #columnDefs = list( list(targets = columnNumbers, visible = FALSE) ),
+          dom = "Blfrtip",
+          buttons = c('selectNone','copy', 'csv', 'excel') # 'selectAll', 
+        ),
+        selection="none"
+      ), server = F
+    )
+    #        })
     
-    # Selected by default
-    updateSelectInput(session, "Columns", choices=names(timeSeries), 
-                      selected = c("UniqueID", "Dataset", "T0.5 min", "T1 min", "T2 min", "T5 min", "T10 min", "Gene ID", "Gene Name", "Orthogroup")
-                      )
+    
+    
     
     data2 <- reactiveValues()
     # highlight selected rows in the lineplot and show 3d structure
@@ -261,28 +286,6 @@ server <- function(input, output, session) {
     )
 
 
-    # Column filtering changing the data table
-    observeEvent(input$Columns, {
-        columnNumbers <- which(!names(timeSeries) %in% input$Columns)
-        output$overviewTable <- DT::renderDT(
-            datatable(
-                data = timeSeries,
-                extensions = c('Select','Buttons'),
-                filter = 'top',
-                rownames= T,
-                options = list(
-                  select = list(style = "multi", items = "row"),
-                  scrollX = TRUE,   ## enable scrolling on X axis
-                  scrollY = TRUE,   ## enable scrolling on Y axis
-                  autoWidth = TRUE, ## use smart column width handling
-                  columnDefs = list( list(targets = columnNumbers, visible = FALSE) ),
-                  dom = "Blfrtip",
-                  buttons = c('selectAll', 'selectNone','copy', 'csv', 'excel')
-                  ),
-                selection="none"
-                ), server = F
-            )
-        })
     }
 
     
