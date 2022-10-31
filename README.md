@@ -1,7 +1,7 @@
 # AuxPhos (AUXin PHOSphoproteomics resource)
 AuxPhos is a tool/resource to access data from the Auxin-dependent phosphorylation studies performed at the [Weijers lab, Laboratory of Biochemistry, Wageningen University](https://www.wur.nl/en/Research-Results/Chair-groups/Agrotechnology-and-Food-Sciences/Biomolecular-Sciences/Laboratory-of-Biochemistry/Research/Plant-Development.htm). This repository contains analyzed data as well as a Shiny app to visualize the data. Look at the 'Overview' page in the Shiny app, for details about experimental data. 
 
-Shiny app is accessible here: [https://sumanthmutte.shinyapps.io/AuxPhos](https://sumanthmutte.shinyapps.io/AuxPhos)
+Shiny app is accessible here: [https://weijerslab.shinyapps.io/AuxPhos](https://weijerslab.shinyapps.io/AuxPhos)
 
 ---
 
