@@ -10,6 +10,8 @@ afb1-2min-IAA	A. thaliana	afb1 mutant	100nM IAA	283
 afb1-2min-mock	A. thaliana	afb1 mutant	Mock	552
 abp1-2min-IAA	A. thaliana	abp1 mutant	100nM IAA	513
 abp1-2min-mock	A. thaliana	abp1 mutant	Mock	1933
+aux1-2min-IAA	A. thaliana	aux1 mutant	100nM IAA	856
+aux1-2min-mock	A. thaliana	aux1 mutant	Mock	2016
 Atmark-2min-IAA	A. thaliana	mark null mutant	100nM IAA	735
 Atmark-2min-mock	A. thaliana	mark null mutant	Mock	536
 Col0-2min-Fusicoccin	A. thaliana	Col-0	100nM Fusicoccin	1097
