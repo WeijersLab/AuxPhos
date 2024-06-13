@@ -73,7 +73,7 @@ ui <- dashboardPage(
                 h4(strong("Experimental data")), p("In the table below, details about the various auxin treatments across species and the mutants are given. 'Dataset' contains the short name used across the database. 'Species/ecotype/mutant' refers to the plant genetic background from which this particular dataset has been generated. 'Treatment' shows the concentration and the hormone/chemical used for treatment, otherwise given as Mock. 'Phosphosites' shows the number of total peptides found in that dataset."), br(),
                 fluidRow(column(12, align="center", div(DT::dataTableOutput("samplesTable")))), br(),
                 h4(strong("Data accessibility")), p("Through the 'Phosphoproteomes' page, all the data mentioned in the section above can be accessed, whereas 'Orthogroups' page contains a lookup table showing the clustering of orthogroups from various species, shown in the 'Phosphoproteomes' page. Please refer to the 'Help' page for detailed usage instructions of AuxPhos tool. However, if you are interested in using this app instance on your own computer, we recommend looking at the instructions provided in the AuxPhos GitHub respository here: https://github.com/WeijersLab/AuxPhos."), br(), 
-                h4(strong("References")), p("Roosjen M, Kuhn A et al., in preparation."), br() 
+                h4(strong("References")), p("Kuhn, A., Roosjen, M., Mutte, S., Dubey, S.M., Carrillo Carrasco, V.P., Boeren, S., Monzer, A., Koehorst, J., Kohchi, T., Nishihama, R., Fendrych, M., Sprakel, J., Friml, J., Weijers, D., 2024. RAF-like protein kinases mediate a deeply conserved, rapid auxin response. Cell 187, 130-148.e17. https://doi.org/10.1016/j.cell.2023.11.021"), br() 
         ),
           
 
