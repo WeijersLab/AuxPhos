@@ -53,7 +53,7 @@ ui <- dashboardPage(
     
     dashboardBody(
         
-        # Add background 'white' for the body to make plot/structures look nicer
+        # Add background "white" for the body to make plot/structures look nicer
         tags$head(tags$style(HTML('
                                 /* body */
                                 .content-wrapper, .right-side {
