@@ -35,10 +35,9 @@ For some technical reason (or the ease of access), if you are interested in usin
 
 ---
 
-If you use this tool/data, please refer/cite the following publications:
+If you use this tool/data, please refer/cite the following publication:
 
-- Roosjen M, Kuhn A et al., Unpublished
-- Kuhn A, Roosjen M et al., Unpublished
+`Kuhn, A., Roosjen, M., Mutte, S., Dubey, S.M., Carrillo Carrasco, V.P., Boeren, S., Monzer, A., Koehorst, J., Kohchi, T., Nishihama, R., Fendrych, M., Sprakel, J., Friml, J., Weijers, D., 2024. RAF-like protein kinases mediate a deeply conserved, rapid auxin response. Cell 187, 130-148.e17. https://doi.org/10.1016/j.cell.2023.11.021`
 
 ---
 
